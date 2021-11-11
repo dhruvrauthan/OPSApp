@@ -1,17 +1,15 @@
-package com.example.opsapp;
+package com.example.opsapp.activity;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
@@ -30,6 +28,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.opsapp.R;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_LOCATION_PERMISSION = 1;
 
     //ui
-    private Button mDiscoverButton;
+    private Button mDiscoverButton, mGoToLocalButton;
     private ListView mDevicesListView;
     private TextView mConnectionStatusTextView;
 
@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         mDiscoverButton = findViewById(R.id.button_discover);
+        mGoToLocalButton= findViewById(R.id.button_go_to_local);
         mDevicesListView = findViewById(R.id.listview_devices);
         mConnectionStatusTextView = findViewById(R.id.textview_connection_status);
 
@@ -199,6 +200,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+        });
+
+        mGoToLocalButton.setOnClickListener(v->{
+            Intent intent = new Intent(MainActivity.this, LocalActivity.class);
+            startActivity(intent);
         });
     }
 
