@@ -78,6 +78,7 @@ public class ClientRegistrationActivity extends AppCompatActivity {
                 keyGen.initialize(1024);
                 mKeyPair= keyGen.generateKeyPair();
 
+                //send public key
                 String publicKeyString = Base64.getEncoder().
                         encodeToString(mKeyPair.getPublic().getEncoded());
                 if(mServer.checkPublicKeyExists(publicKeyString)){

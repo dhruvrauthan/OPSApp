@@ -4,19 +4,18 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.example.opsapp.model.Client;
 import com.example.opsapp.model.RegisteredClient;
 
 @Dao
-public interface ClientDao {
+public interface ServerDao {
 
     @Insert
-    void addClient(Client client);
+    void addClientToServerDatabase(RegisteredClient registeredClient);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Client where id=:id)")
+    @Query("SELECT EXISTS (SELECT 1 FROM RegisteredClient where id=:id)")
     boolean idExists(String id);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Client where publicKey=:publicKey)")
+    @Query("SELECT EXISTS (SELECT 1 FROM RegisteredClient where publicKey=:publicKey)")
     boolean publicKeyExists(String publicKey);
 
 }

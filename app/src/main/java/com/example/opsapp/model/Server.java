@@ -7,7 +7,9 @@ import android.util.Log;
 import androidx.room.Room;
 
 import com.example.opsapp.dao.ClientDao;
+import com.example.opsapp.dao.ServerDao;
 import com.example.opsapp.database.ClientDatabase;
+import com.example.opsapp.database.ServerDatabase;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -24,7 +26,9 @@ public class Server {
     private static final String TAG = "==Server";
 
     private ClientDatabase mClientDatabase;
+    private ServerDatabase mServerDatabase;
     private ClientDao mClientDao;
+    private ServerDao mServerDao;
     private KeyPair mKeyPair;
 
     public Server(Context context) {
@@ -32,7 +36,13 @@ public class Server {
                 ClientDatabase.class, "client-database")
                 .allowMainThreadQueries()
                 .build();
+        mServerDatabase = Room.databaseBuilder(context,
+                ServerDatabase.class, "server-database")
+                .allowMainThreadQueries()
+                .build();
+
         mClientDao = mClientDatabase.clientDao();
+        mServerDao= mServerDatabase.serverDao();
 
         //server keys
         KeyPairGenerator keyGen = null;
@@ -55,12 +65,12 @@ public class Server {
     }
 
     public boolean checkClientIdExists(String userID) {
-        return mClientDao.idExists(userID);
+        return mServerDao.idExists(userID);
     }
 
     //abort if (vk,.) belongs to S.Registry
     public boolean checkPublicKeyExists(String publicKey) {
-        return mClientDao.publicKeyExists(publicKey);
+        return mServerDao.publicKeyExists(publicKey);
     }
 
     //for base64 encoder
@@ -72,7 +82,11 @@ public class Server {
 
         //S.onBal(A) -> 0
         Client client = new Client(userID, 0, publicKeyString, privateKeyString);
+        RegisteredClient registeredClient= new RegisteredClient(userID, 0, publicKeyString);
+
+        //add client to local database and server database. the registered client does not have the private key
         mClientDao.addClient(client);
+        mServerDao.addClientToServerDatabase(registeredClient);
 
         createClientCertificate(publicKeyString);
     }
