@@ -11,14 +11,23 @@ import com.example.opsapp.dao.ServerDao;
 import com.example.opsapp.database.ClientDatabase;
 import com.example.opsapp.database.ServerDatabase;
 
+import java.io.ByteArrayInputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Base64;
 import java.util.BitSet;
+
+import javax.security.cert.CertificateEncodingException;
 
 public class Server {
 
@@ -63,36 +72,42 @@ public class Server {
 
         return single_instance;
     }
-
+    
     public boolean checkClientIdExists(String userID) {
         return mServerDao.idExists(userID);
     }
 
-    //abort if (vk,.) belongs to S.Registry
+    //2a.
     public boolean checkPublicKeyExists(String publicKey) {
         return mServerDao.publicKeyExists(publicKey);
     }
 
     //for base64 encoder
     @SuppressLint("NewApi")
-    //add (vk,) to S.Registry
+
+    //2b. Add (vkA, ⊥) to S.Registry;
     public void registerClient(String userID, KeyPair keyPair) {
         String publicKeyString = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
         String privateKeyString = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
-        //S.onBal(A) -> 0
-        Client client = new Client(userID, 0, publicKeyString, privateKeyString);
+        //2c. S.onBalA ← 0;
+        Client client = new Client(userID, 0, publicKeyString, privateKeyString, "");
         RegisteredClient registeredClient= new RegisteredClient(userID, 0, publicKeyString);
 
         //add client to local database and server database. the registered client does not have the private key
         mClientDao.addClient(client);
         mServerDao.addClientToServerDatabase(registeredClient);
 
-        createClientCertificate(publicKeyString);
+        createClientCertificate(keyPair.getPublic(), client);
     }
 
-    //create cert, such that cert.vk->vk(A) and cert.sign->Sign(vk(A), sk(S))
-    public void createClientCertificate(String publicKeyString) {
+    //for base64 encoder
+    @SuppressLint("NewApi")
+
+    //2d. Create certA such that certA.vk ← vkA and certA.sig ← Sign(vkA, skS);
+    public void createClientCertificate(PublicKey publicKey, Client client) {
+        String publicKeyString = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+
         try {
             //sign with server private key
             Signature sign = Signature.getInstance("NONEwithRSA");
@@ -106,14 +121,23 @@ public class Server {
 
             byte[] signature = sign.sign();
 
-            Certificate cert = new Certificate(publicKeyString, signature.toString());
+            client.setCertificate(signature.toString());
 
-            //send cert back to client here
+            mClientDao.updateClient(client);
 
-            //Log.i(TAG, cert.toString());
+            //2e. Send certA to A.
+
+            //Certificate cert = new Certificate(publicKeyString, signature.toString());
+            //CertificateFactory certificateFactory= CertificateFactory.getInstance("X.509");
+            //ByteArrayInputStream stream= new ByteArrayInputStream(signature);
+            //Certificate cert= CertificateFactory.getInstance("X.509").generateCertificate(stream);
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             e.printStackTrace();
         }
+    }
+
+    public Client getClient(String id){
+        return mClientDao.getClient(id);
     }
 
 }

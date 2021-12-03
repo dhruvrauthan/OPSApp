@@ -18,6 +18,13 @@
         android:id="@+id/button_server_activty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:text="Server"/>
+
+    <Button
+        android:id="@+id/button_transaction_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transaction"/>
 
 </LinearLayout>

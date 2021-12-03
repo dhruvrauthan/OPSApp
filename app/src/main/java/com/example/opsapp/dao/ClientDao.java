@@ -3,6 +3,7 @@ package com.example.opsapp.dao;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.example.opsapp.model.Client;
 import com.example.opsapp.model.RegisteredClient;
@@ -13,10 +14,10 @@ public interface ClientDao {
     @Insert
     void addClient(Client client);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Client where id=:id)")
-    boolean idExists(String id);
+    @Update
+    void updateClient(Client client);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Client where publicKey=:publicKey)")
-    boolean publicKeyExists(String publicKey);
+    @Query("SELECT * from Client where id= :id")
+    Client getClient(String id);
 
 }
