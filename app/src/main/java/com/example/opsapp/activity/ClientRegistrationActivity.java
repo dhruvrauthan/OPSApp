@@ -83,15 +83,19 @@ public class ClientRegistrationActivity extends AppCompatActivity {
 
                 //1. A sends [RegisterClient, vk ] to S
                 RegistrationPacket registrationPacket= new RegistrationPacket(publicKeyString);
+                mProgressTextView.setText("");
+                mProgressTextView.append("1. A sends [RegisterClient, vk ] to S\n\n");
 
                 //2a. Abort if (vkA, ·) ∈ S.Registry;
                 if(mServer.checkPublicKeyExists(publicKeyString)){
                     showToast("This public key already exists");
+                    mProgressTextView.append("2a. Abort if (vkA, ·) ∈ S.Registry\n\n");
                     return;
                 }
 
+                mProgressTextView.append("2a. (vkA, ·) ∉ S.Registry\n\n");
                 //2b.
-                mServer.registerClient(userID, mKeyPair);
+                mServer.registerClient(userID, mKeyPair, mProgressTextView);
                 showToast("Client registered");
 
             } catch (NoSuchAlgorithmException e) {

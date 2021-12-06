@@ -10,7 +10,7 @@ import com.example.opsapp.R;
 
 public class LocalActivity extends AppCompatActivity {
 
-    private Button mClientActivityButton, mServerActivityButton;
+    private Button mClientActivityButton, mServerActivityButton, mTransactionActivityButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +23,7 @@ public class LocalActivity extends AppCompatActivity {
     private void initUI() {
         mClientActivityButton= findViewById(R.id.button_client_activity);
         mServerActivityButton= findViewById(R.id.button_server_activty);
+        mTransactionActivityButton= findViewById(R.id.button_transaction_activity);
 
         initClicks();
     }
@@ -37,5 +38,12 @@ public class LocalActivity extends AppCompatActivity {
             Intent intent= new Intent(LocalActivity.this, ServerActivity.class);
             startActivity(intent);
         });
+
+        mTransactionActivityButton.setOnClickListener(v->{
+            Intent intent= new Intent(LocalActivity.this, TransactionActivity.class);
+            startActivity(intent);
+        });
+
+
     }
 }

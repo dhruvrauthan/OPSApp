@@ -3,6 +3,7 @@ package com.example.opsapp.model;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.room.Room;
 
@@ -72,10 +73,6 @@ public class Server {
 
         return single_instance;
     }
-    
-    public boolean checkClientIdExists(String userID) {
-        return mServerDao.idExists(userID);
-    }
 
     //2a.
     public boolean checkPublicKeyExists(String publicKey) {
@@ -86,7 +83,7 @@ public class Server {
     @SuppressLint("NewApi")
 
     //2b. Add (vkA, ⊥) to S.Registry;
-    public void registerClient(String userID, KeyPair keyPair) {
+    public void registerClient(String userID, KeyPair keyPair, TextView mProgressTextView) {
         String publicKeyString = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
         String privateKeyString = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
@@ -98,14 +95,17 @@ public class Server {
         mClientDao.addClient(client);
         mServerDao.addClientToServerDatabase(registeredClient);
 
-        createClientCertificate(keyPair.getPublic(), client);
+        mProgressTextView.append("2b. Add (vkA, ⊥) to S.Registry\n\n");
+        mProgressTextView.append("2c. S.onBalA ← 0;\n\n");
+
+        createClientCertificate(keyPair.getPublic(), client, mProgressTextView);
     }
 
     //for base64 encoder
     @SuppressLint("NewApi")
 
     //2d. Create certA such that certA.vk ← vkA and certA.sig ← Sign(vkA, skS);
-    public void createClientCertificate(PublicKey publicKey, Client client) {
+    public void createClientCertificate(PublicKey publicKey, Client client, TextView mProgressTextView) {
         String publicKeyString = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 
         try {
@@ -125,7 +125,10 @@ public class Server {
 
             mClientDao.updateClient(client);
 
+            mProgressTextView.append("2d. Create certA such that certA.vk ← vkA and certA.sig ← Sign(vkA, skS)\n\n");
+
             //2e. Send certA to A.
+            mProgressTextView.append("2e. Send certA to A.\n\n");
 
             //Certificate cert = new Certificate(publicKeyString, signature.toString());
             //CertificateFactory certificateFactory= CertificateFactory.getInstance("X.509");
@@ -133,7 +136,12 @@ public class Server {
             //Certificate cert= CertificateFactory.getInstance("X.509").generateCertificate(stream);
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             e.printStackTrace();
+            mProgressTextView.append("An error occurred: "+ e.getMessage());
         }
+    }
+
+    public boolean checkClientIdExists(String userID) {
+        return mServerDao.idExists(userID);
     }
 
     public Client getClient(String id){
