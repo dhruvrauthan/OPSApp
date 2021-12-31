@@ -164,6 +164,7 @@ public class TransactionActivity extends AppCompatActivity {
                 //(b) B adds 𝑃 to B.inPaymentLog and sends [ReceivedPayment] to A;
                 ArrayList<PaymentPacket> arrayList1 = mReceiver.getInPaymentLog();
                 arrayList1.add(mPaymentPacket);
+                mReceiver.setInPaymentLog(arrayList1);
                 mProgressTextView.append("(b) B adds P to B.inPaymentLog and sends [ReceivedPayment] to A;\n\n");
 
                 //send [ReceivedPayment] to A
