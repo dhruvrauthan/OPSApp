@@ -13,6 +13,7 @@ import com.example.opsapp.database.ClientDatabase;
 import com.example.opsapp.database.ServerDatabase;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -25,6 +26,7 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.BitSet;
 
@@ -45,10 +47,12 @@ public class Server {
         mClientDatabase = Room.databaseBuilder(context,
                 ClientDatabase.class, "client-database")
                 .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
                 .build();
         mServerDatabase = Room.databaseBuilder(context,
                 ServerDatabase.class, "server-database")
                 .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
                 .build();
 
         mClientDao = mClientDatabase.clientDao();
@@ -88,8 +92,8 @@ public class Server {
         String privateKeyString = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
         //2c. S.onBalA ← 0;
-        Client client = new Client(userID, 0, publicKeyString, privateKeyString, "");
-        RegisteredClient registeredClient= new RegisteredClient(userID, 0, publicKeyString);
+        Client client = new Client(userID, 100, publicKeyString, privateKeyString, "");
+        RegisteredClient registeredClient= new RegisteredClient(userID, 100, publicKeyString);
 
         //add client to local database and server database. the registered client does not have the private key
         mClientDao.addClient(client);
@@ -120,6 +124,13 @@ public class Server {
             sign.update(dataBytes);
 
             byte[] signature = sign.sign();
+
+            //testing
+            String encoded= Base64.getEncoder().encodeToString(signature.toString().getBytes());
+            Log.d(TAG, "encoded: "+encoded);
+            String decoded= new String(Base64.getDecoder().decode(encoded.getBytes()));
+            Log.d(TAG, "decoded: "+decoded);
+            Log.d(TAG, "original value: "+ signature);
 
             client.setCertificate(signature.toString());
 

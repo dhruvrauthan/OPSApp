@@ -24,6 +24,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 
@@ -101,6 +102,8 @@ public class TrustedApplication {
 
             PrivateKey privateK= fact.generatePrivate(spec);
 
+            Log.d("==TrustedApplication", "privatekey:"+ privateKey);
+
             sign.initSign(privateK);
 
             //create [P.amount, P.sender, P.receiver] array
@@ -115,11 +118,13 @@ public class TrustedApplication {
             //sign arraylist with ta's private key T.sk
             sign.update(dataBytes);
 
-            byte[] signature = sign.sign();
+            byte[] signatureBytes = sign.sign();
 
             //create payment packet P
             PaymentPacket P= new PaymentPacket(amount, sender.getCertificate(),
-                    receiver.getCertificate(), signature.toString());
+                    receiver.getCertificate(), /*Base64.getEncoder().encodeToString(signatureBytes.toString().getBytes()),*/
+                    signatureBytes,
+                    sign);
             mProgressTextView.append("4. P.amount ← x; P.sender ← T.cert; P.receiver ← receiver; P.index ← T.j;\n\n");
 
             //5. Output 𝑃, where 𝑃.sig←Sign([𝑃.amount,𝑃.sender,𝑃.receiver,𝑃.index],T.sk).
